@@ -1,4 +1,4 @@
-#import midi
+import src.midi
 import subprocess
 import shlex
 import os
@@ -17,7 +17,23 @@ class ValuesOfMidiFile(object):
                 pitch = extractData[0:2]
                 return pitch
 
-###def checkTempo(self):    
+    def checkTempo(self):   
+        counter = 0
+        arr = []
+        for line in self.file:
+            check = line.split("(")
+            while check[0] != "midi.ControlChangeEvent" and check[0] != "midi.ProgramChangeEvent" :
+                tmp = line.split("tick=")
+                extractData = tmp[1]
+                if arr[counter] != arr[counter-1]:
+                    arr += int(extractData[0:2])
+                counter+=1
+        lastEl = arr[-1]
+
+
+        
+                
+
 
 class MidiToNotesConverter(object):
     
