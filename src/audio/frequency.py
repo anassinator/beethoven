@@ -26,25 +26,24 @@ class FrequencyStream(object):
 
     def fft(self, data, jump):
         """Return data in frequency domain."""
-        #cut up data
-        #start frame
+        # cut up data
+        # start frame
         start = 0
-        #go until interval reaches final frame
-        while start+8192 < len(data):
-            #get fft of interval
+        # go until interval reaches final frame
+        while start + 8192 < len(data):
+            # get fft of interval
             freq = np.absolute(np.fft.rfft(data[start:start+8192]))
-            #send out fft
+            # send out fft
             yield freq
-            #move to next interval
+            # move to next interval
             start += jump
-	
 
     def read(self, jump, frames=None):
         """Read a number of frames of data into the stream."""
-        #read all frames
+        # read all frames
         self.mic.read(frames)
-        #iterate through buffers
-        for buff in self.fft(self.mic.stream.channel_1,jump):
+        # iterate through buffers
+        for buff in self.fft(self.mic.stream.channel_1, jump):
             yield buff
 
 

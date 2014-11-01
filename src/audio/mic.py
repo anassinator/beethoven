@@ -35,7 +35,7 @@ class Mic(object):
 
     """Microphone class."""
 
-    def __init__(self, name, fs=8192, buffersize=1024):
+    def __init__(self, name=None, fs=8192, buffersize=1024):
         """Construct Microphone object.
 
         name: name of the microphone
@@ -61,16 +61,19 @@ class Mic(object):
         for i in range(self.audio.get_device_count()):
             device = self.audio.get_device_info_by_index(i)
             if device['name'] == self.name:
-                index = device['index']
+                self.device = self.audio.open(
+                    format=pyaudio.paFloat32, channels=2,
+                    input=True, rate=self.fs,
+                    frames_per_buffer=self.buffersize,
+                    input_device_index=device['index']
+                )
                 break
         else:
-            index = -1
-
-        self.device = self.audio.open(
-            format=pyaudio.paFloat32, channels=2, input=True,
-            rate=self.fs, frames_per_buffer=self.buffersize,
-            input_device_index=index
-        )
+            self.device = self.audio.open(
+                format=pyaudio.paFloat32, channels=2,
+                input=True, rate=self.fs,
+                frames_per_buffer=self.buffersize
+            )
 
     def close(self):
         """Close audio streams."""
