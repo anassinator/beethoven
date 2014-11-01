@@ -15,27 +15,27 @@ frequencies = [65.40639132514966, 69.29565774421802, 73.41619197935191, 77.78174
 #fre = absolute(fft.fft(dis)[:4001])
 recording = True
 sleep(2)
-start = 0
 uncombined = []
 
 aud = FrequencyStream()
 aud.mic.open()
 
-aud.read()
-fre = aud.channel_1
-f = open("fre",'w')
 
-for x in fre:
-	f.write(str(x))
-	f.write('\n')
 
-f.close()
+
 
 goodFre = []
 good = []
-aud.read()
-for fre in aud.nextB():
-	threshold = max(fre[63:])/3
+start = 0
+jump = 144
+for fre in aud.read(jump,8192*2):
+	f = open("fre",'w')
+	for x in fre:
+		f.write(str(x))
+		f.write('\n')
+	f.close()
+	
+	threshold = max(fre[63:])/4
 	for x in range(1,8192/2):
 		if fre[x] > threshold:
 			goodFre.append((x,fre[x]))
@@ -45,8 +45,9 @@ for fre in aud.nextB():
 			good.append(x+1)
 	for x in good:		
 		uncombined.append([x,start,start+1000])
+	start += jump
 
-#aud.mic.close()
+aud.mic.close()
 uncombined=sorted(uncombined)
 noteSegment = 0
 length = len(uncombined)
@@ -61,9 +62,7 @@ while noteSegment < len(uncombined)-1:
 	else:
 		noteSegment+=1
 			
-combined = [Note(x[0], x[1], x[2]) for x in uncombined]
-
-combined=[Note(1,0,50),Note(50,100,500),Note(30,500,100)]
+combined = [Note(x[0]+35, x[1], x[2]) for x in uncombined]
 
 newMidi = MidiGenerator(1000,1)
 channel = Channel()

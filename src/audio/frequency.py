@@ -14,8 +14,6 @@ class FrequencyStream(object):
     def __init__(self):
         """Construct FrequencyStream object."""
         self.mic = Mic('Blue Snowball')
-        self.channel_1 = []
-        self.channel_2 = []
 
     def __enter__(self):
         """Open and return frequency stream."""
@@ -29,21 +27,25 @@ class FrequencyStream(object):
     def fft(self, data, jump):
         """Return data in frequency domain."""
         #cut up data
+        #start frame
         start = 0
-        while start+1000 < len(data):
-			freq = np.absolute(np.fft.rfft(data[start:start+1000]))
-			yield freq
-			start += jump
+        #go until interval reaches final frame
+        while start+8192 < len(data):
+            #get fft of interval
+            freq = np.absolute(np.fft.rfft(data[start:start+8192]))
+            #send out fft
+            yield freq
+            #move to next interval
+            start += jump
 	
-	def nextB(self):
-		for buff in self.fft(self.mix.stream.channel_1,10)
-			yield buff
 
-    def read(self, frames=None):
+    def read(self, jump, frames=None):
         """Read a number of frames of data into the stream."""
+        #read all frames
         self.mic.read(frames)
-        #self.channel_1 = self.fft(self.mic.stream.channel_1,10)
-        #self.channel_2 = self.fft(self.mic.stream.channel_2,10)
+        #iterate through buffers
+        for buff in self.fft(self.mic.stream.channel_1,jump):
+            yield buff
 
 
 def main():
