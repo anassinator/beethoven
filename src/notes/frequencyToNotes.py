@@ -31,11 +31,10 @@ for x in fre:
 
 f.close()
 
-while recording:
-	goodFre = []
-	good = []
-	aud.read()
-	fre = aud.channel_1
+goodFre = []
+good = []
+aud.read()
+for fre in aud.nextB():
 	threshold = max(fre[63:])/3
 	for x in range(1,8192/2):
 		if fre[x] > threshold:
@@ -46,10 +45,7 @@ while recording:
 			good.append(x+1)
 	for x in good:		
 		uncombined.append([x,start,start+1000])
-	#start += 10
-	#if start == 8192/2:
-		#recording = False
-	recording = False
+
 #aud.mic.close()
 uncombined=sorted(uncombined)
 noteSegment = 0
@@ -66,6 +62,9 @@ while noteSegment < len(uncombined)-1:
 		noteSegment+=1
 			
 combined = [Note(x[0], x[1], x[2]) for x in uncombined]
+
+combined=[Note(1,0,50),Note(50,100,500),Note(30,500,100)]
+
 newMidi = MidiGenerator(1000,1)
 channel = Channel()
 for x in combined:
