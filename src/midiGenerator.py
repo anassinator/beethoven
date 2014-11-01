@@ -6,13 +6,11 @@ class MidiGenerator(object):
         self.pattern=midi.Pattern([],resolution,format,False)
     
     def save(self,filename):
+        self.pattern.make_ticks_rel()
         midi.write_midifile(filename,self.pattern)
     
     def addChannel(self,channel):
         self.pattern.append(channel.track)
-
-    def make_ticks_rel(self):
-        self.pattern.make_ticks_rel()
 
 class Channel(object):
     def __init__(self):
