@@ -1,0 +1,13 @@
+import midiGenerator
+generator = midiGenerator.MidiGenerator(200,1)
+channel = midiGenerator.Channel()
+note = midiGenerator.Note(43,100,200)
+channel.addNote(note)
+channel.addNote(midiGenerator.Note(45,200,300))
+channel.addNote(midiGenerator.Note(57,300,400))
+channel.addNote(midiGenerator.Note(38,400,500))
+channel.addNote(midiGenerator.Note(33,500,600))
+channel.addNote(midiGenerator.Note(45,600,700))
+channel.endTrack()
+generator.addChannel(channel)
+generator.save("t.midi")
