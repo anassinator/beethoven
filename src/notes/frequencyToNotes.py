@@ -40,7 +40,6 @@ while recording:
 	for x in range(1,8192/2):
 		if fre[x] > threshold:
 			goodFre.append((x,fre[x]))
-	print goodFre
 	for x in range(0,len(frequencies)):
 		pos = [i for i, v in enumerate(goodFre) if v[0]-0.5 <= frequencies[x] and v[0]+0.5 >= frequencies[x]]
 		if pos:
@@ -67,6 +66,11 @@ while noteSegment < len(uncombined)-1:
 		noteSegment+=1
 			
 combined = [Note(x[0], x[1], x[2]) for x in uncombined]
-newMidi = MidiGenerator(100,1)
-newMidi.
-	
+newMidi = MidiGenerator(1000,1)
+channel = Channel()
+for x in combined:
+	channel.addNote(x)
+channel.endTrack()
+newMidi.addChannel(channel)
+print newMidi.pattern
+newMidi.save("new.midi")
