@@ -11,10 +11,12 @@ class Stream(object):
 
     """Dual-channel audio stream class."""
 
-    def __init__(self):
-        """Construct Stream object."""
+    def __init__(self, raw=None):
+        """Construct Stream object from raw audio data."""
         self.channel_1 = []
         self.channel_2 = []
+        if raw:
+            self.append(raw)
 
     @staticmethod
     def parse(raw):
@@ -75,14 +77,18 @@ class Mic(object):
         self.audio.close(self.device)
         self.audio.terminate()
 
-    def read(self):
-        """Read a full second of data into the stream."""
-        raw = self.device.read(self.fs)
-        self.stream.append(raw)
+    def read(self, frames=None):
+        """Read a number of frames of data into the stream."""
+        if frames:
+            raw = self.device.read(frames)
+        else:
+            raw = self.device.read(self.fs)
+
+        self.stream = Stream(raw)
 
 
 def main():
-    """Plot one second of data from the microphone."""
+    """Plot one second of data in the time domain."""
     with Mic('Blue Snowball') as mic:
         mic.read()
         pl.subplot(2, 1, 1)
