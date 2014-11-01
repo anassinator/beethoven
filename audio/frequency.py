@@ -28,7 +28,7 @@ class FrequencyStream(object):
 
     def fft(self, data):
         """Return data in frequency domain."""
-        freq = np.fft.rfft(data)
+        freq = np.absolute(np.fft.rfft(data))
         return freq
 
     def read(self, frames=None):
