@@ -40,20 +40,20 @@ class Track(list):
         super(Track, self).__init__(events)
 
     def make_ticks_abs(self):
-        if (self.tick_relative):
-            self.tick_relative = False
-            running_tick = 0
-            for event in self:
-                event.tick += running_tick
-                running_tick = event.tick
+        #if (self.tick_relative):
+        self.tick_relative = False
+        running_tick = 0
+        for event in self:
+            event.tick += running_tick
+            running_tick = event.tick
 
     def make_ticks_rel(self):
-        if (not self.tick_relative):
-            self.tick_relative = True
-            running_tick = 0
-            for event in self:
-                event.tick -= running_tick
-                running_tick += event.tick
+        #if (not self.tick_relative):
+        self.tick_relative = True
+        running_tick = 0
+        for event in self:
+            event.tick -= running_tick
+            running_tick += event.tick
 
     def __getitem__(self, item):
         if isinstance(item, slice):
