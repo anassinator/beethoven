@@ -46,10 +46,10 @@ class LyGenerator():
     @staticmethod        
     def parseDuration(duration, pitch_letter):
         for x in range(0,8):
-            if duration >= 240*8/2**x:
+            if duration >= 64*16/2**x:
                 return "{letter}{x} {parsed}".format(
                     letter=pitch_letter, x = 2 ** x,
-                    parsed=LyGenerator.parseDuration(duration - 240*8/(2**x),
+                    parsed=LyGenerator.parseDuration(duration - 64*16/(2**x),
                                                      pitch_letter)
                 )
         return ""
