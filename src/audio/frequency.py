@@ -30,7 +30,7 @@ class FrequencyStream(object):
         # start frame
         start = 0
         # go until interval reaches final frame
-        while start + 8192 < len(data):
+        while start + 8192 <= len(data):
             # get fft of interval
             freq = np.absolute(np.fft.rfft(data[start:start+8192]))
             # send out fft
@@ -38,7 +38,7 @@ class FrequencyStream(object):
             # move to next interval
             start += jump
 
-    def read(self, jump, frames=None):
+    def read(self, jump=1024, frames=None):
         """Read a number of frames of data into the stream."""
         # read all frames
         self.mic.read(frames)

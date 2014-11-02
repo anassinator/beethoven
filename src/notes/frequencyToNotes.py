@@ -21,21 +21,18 @@ aud = FrequencyStream()
 aud.mic.open()
 
 
-
-
-
 goodFre = []
 good = []
 start = 0
-jump = 144
-for fre in aud.read(jump,8192*2):
-	f = open("fre",'w')
+jump = 1024/8
+for fre in aud.read(jump):
+	f = open("freq",'w')
 	for x in fre:
 		f.write(str(x))
 		f.write('\n')
 	f.close()
-	
-	threshold = max(fre[63:])/4
+
+	threshold = max([max(fre[63:])/2,2])
 	for x in range(1,8192/2):
 		if fre[x] > threshold:
 			goodFre.append((x,fre[x]))
@@ -44,7 +41,7 @@ for fre in aud.read(jump,8192*2):
 		if pos:
 			good.append(x+1)
 	for x in good:		
-		uncombined.append([x,start,start+1000])
+		uncombined.append([x,start,start+jump])
 	start += jump
 
 aud.mic.close()
@@ -62,9 +59,9 @@ while noteSegment < len(uncombined)-1:
 	else:
 		noteSegment+=1
 			
-combined = [Note(x[0]+35, x[1], x[2]) for x in uncombined]
+combined = [Note(x[0]+35, x[1]/10, x[2]/10) for x in uncombined]
 
-newMidi = MidiGenerator(1000,1)
+newMidi = MidiGenerator(200,1)
 channel = Channel()
 for x in combined:
 	channel.addNote(x)
