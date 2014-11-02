@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Beethoven</title>
+        <style type="text/css">
+            body {
+                text-align: center;
+                margin: auto;
+            }
+            h1 {
+                padding-top: 50px;
+                font-family: Garamond;
+                font-size: 3em;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Beethoven</h1>
+        <img id="notes" src="http://localhost:5000/static/notes.png">
+        <script type="text/javascript">
+            setInterval(function() {
+                document.getElementById("notes").src = "http://localhost:5000/static/notes.png?time=" + new Date().getTime();
+            }, 1000);
+        </script>
+    </body>
+</html>
