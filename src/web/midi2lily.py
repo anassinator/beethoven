@@ -31,9 +31,6 @@ class MidiParser(object):
         return note 
             
 
-
-
-
 class LyGenerator():
     def __init__(self,note):
         self.note=note
