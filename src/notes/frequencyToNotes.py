@@ -1,7 +1,8 @@
 from numpy import *
 from matplotlib import pyplot as plt
 from time import sleep
-from audio.frequency import FrequencyStream
+
+from ..frequency import FrequencyStream
 from midiGenerator import MidiGenerator, Channel, Note
 import generateSheets
 
@@ -93,4 +94,4 @@ channel.endTrack()
 newMidi.addChannel(channel)
 print newMidi.pattern
 newMidi.save("new.midi")
-generateSheets.makePDF("new","new")
+generateSheets.makePNG("new","new")
