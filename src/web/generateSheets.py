@@ -32,7 +32,7 @@ def makePNG(filename,out):
 		f.write("\\new Staff {\n")
 		f.write(output)
 		f.write("\n}\n\n")
-	cmd = "lilypond -dbackend=eps -dno-gs-load-fonts -dinclude-eps-fonts -dpixmap-format=pngalpha --png "+ out + ".ly" + " -o static/notes.png"
+	cmd = "lilypond -dbackend=eps -dno-gs-load-fonts -dinclude-eps-fonts -dpixmap-format=pngalpha --png -o static/notes.png  "+ out + ".ly"
 	print cmd
 	subprocess.Popen(shlex.split(cmd))
 
