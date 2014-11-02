@@ -13,14 +13,15 @@ aud.mic.open()
 
 start = 0
 jump = 8192/128
-for fre in aud.read(jump,8192*5):
+qqq = [x for x in aud.read(jump,8192*5)]
+for fre in qqq:
 	
 	goodFre = []
 	good = []
 	
 	avg = sum(fre)/float(len(fre))
 	#beams need to be above 
-	threshold = avg * 10
+	threshold = avg * 8
 	for x in range(1,8192/2):
 		if fre[x] > threshold:
 			#goodfre contains the freqency, and the amplitude
@@ -31,8 +32,7 @@ for fre in aud.read(jump,8192*5):
 	
 	#find closest one to each piano note, sum surrounding three,
 	#find max
-	
-	print goodFre, frequencies
+
 	
 	for x in range(0,len(frequencies)): #go through each piano note
 		closest = 1
@@ -49,7 +49,6 @@ for fre in aud.read(jump,8192*5):
 			oldPos = goodFre[pos][1]
 			good.append([sum([fre[oldPos],fre[oldPos-1],fre[oldPos+1]]),x+1])#position of piano frequency + 1, and sum of 3 surrounding fft amplitudes
 			#good.append([oldPos,x+1])
-	print good
 	
 	if not good:
 		continue
@@ -57,48 +56,89 @@ for fre in aud.read(jump,8192*5):
 	good = sorted(good)
 	
 	
-	#find max good
-	for x in good:
-		uncombined.append([x[1],start,start+jump])
+	#send all good
+	for x in range(len(good)):
+		uncombined.append([good[x][1]+35,start,start+jump])
 	start += jump
 
 aud.mic.close()
 uncombined=sorted(uncombined)
 noteSegment = 0
-#combine notes
+#combine notes next to eachother that are touching
 while noteSegment < len(uncombined)-1:
 	if uncombined[noteSegment][0] == uncombined[noteSegment+1][0]:
-		if uncombined[noteSegment][2] >= uncombined[noteSegment+1][1]:
+		if uncombined[noteSegment][2] >= uncombined[noteSegment+1][1] - 8192/16:
 			uncombined[noteSegment][2] = uncombined[noteSegment+1][2]
 			del uncombined[noteSegment+1]
+			#delete everything in between
+			
 		else:
 			noteSegment+=1
 	else:
 		noteSegment+=1
 noteSegment = 0
+combined = sorted(uncombined, key = lambda x:x[1])
+
+streams = []
+streams.append([combined[0]])
+for x in combined[1:]:
+	posed = False
+	for stream in range(len(streams)):
+		for note in streams[stream]:
+			#test if overlap - smaller to larger so test if comes after
+			if note[2] <= x[1]: #make sure right side is before left side
+				streams[stream].append(x)
+				posed = True
+			if posed:
+				break
+			
+		if posed:
+			break
+	else:
+		streams.append([x])
+			
+		
+
+"""
 while noteSegment < len(uncombined)-1:
-	for c in range(noteSegment+1,len(uncombined)):
+	for f in range(noteSegment+1,len(uncombined)):
 		#check if ahead of segment, but not more than 3 ahead
-		if c[0] != uncombined[noteSegment][0]:
+		c = uncombined[f]
+		d = uncombined[noteSegment]
+		if c[0] != d[0]:
 			continue
-		if c[1] > uncombined[noteSegment][0]: #check if in front
-			if c[1] < noteSegment+3*jump: #check if in safe range
-				uncombined[noteSegment][2] = c[2]
-			del uncombined[noteSegment+1]
+		if c[2] < d[1]: #check if in front
+			if c[2]+3*128 >= d[1]: #check if in safe range
+				c[2]=d[2] #extend time
+				del uncombined[noteSegment]
+				#delete everything in between
+				if range(noteSegment+1,c):
+					for between in range(noteSegment+1,c):
+						del uncombined[between]
+					
+				
 			else:
 				break #ahead
 	noteSegment += 1
+"""
 
-		
-uncombined = sorted(uncombined, key = lambda x:x[1])
-			
-combined = [Note(x[0]+35, x[1], x[2]) for x in uncombined]
+print streams
+newCombinedStreams = []
+for x in range(len(streams)):
+	newCombinedStreams.append([])
+	for y in streams[x]:
+		newCombinedStreams[x].append(Note(y[0],y[1],y[2]))
 
 newMidi = MidiGenerator(2048,1)
-channel = Channel()
-for x in combined:
-	channel.addNote(x)
-channel.endTrack()
-newMidi.addChannel(channel)
+channels = [Channel() for x in range(len(streams))]
+
+for x in range(len(streams)): #go through channels and streams
+	 for y in newCombinedStreams[x]:
+		channels[x].addNote(y)
+
+for x in range(len(streams)):
+	channels[x].endTrack()
+	newMidi.addChannel(channels[x])
 print newMidi.pattern
 newMidi.save("new.midi")
+
