@@ -2,7 +2,6 @@
 
 """Frequency manager."""
 
-from wavestream import Wave
 from mic import Mic
 import numpy as np
 import pylab as pl
@@ -12,18 +11,18 @@ class FrequencyStream(object):
 
     """Frequency stream."""
 
-    def __init__(self, audio_in):
+    def __init__(self):
         """Construct FrequencyStream object."""
-        self.input = audio_in
+        self.mic = Mic('Blue Snowball')
 
     def __enter__(self):
         """Open and return frequency stream."""
-        self.input.open()
+        self.mic.open()
         return self
 
     def __exit__(self, type, value, traceback):
         """Close stream."""
-        self.input.close()
+        self.mic.close()
 
     def fft(self, data, jump):
         """Return data in frequency domain."""
@@ -39,23 +38,23 @@ class FrequencyStream(object):
             # move to next interval
             start += jump
 
-    def read(self, frames, jump=1024):
+    def read(self, jump=1024, frames=None):
         """Read a number of frames of data into the stream."""
         # read all frames
-        self.input.read(frames)
+        self.mic.read(frames)
         # iterate through buffers
-        for buff in self.fft(self.input.stream.channel_1, jump):
+        for buff in self.fft(self.mic.stream.channel_1, jump):
             yield buff
 
 
 def main():
     """Plot one second of data in the frequency domain."""
-    with FrequencyStream(Mic('1kHz.wav')) as freq:
-        data = [i for i in freq.read(220500)][0]
+    with FrequencyStream() as stream:
+        stream.read()
         pl.subplot(2, 1, 1)
-        pl.plot(freq.input.stream.channel_1)
+        pl.plot(stream.channel_1)
         pl.subplot(2, 1, 2)
-        pl.plot(data)
+        pl.plot(stream.channel_2)
         pl.show()
 
 

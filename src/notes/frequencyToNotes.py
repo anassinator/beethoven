@@ -5,7 +5,6 @@ from audio.frequency import FrequencyStream
 from midiGenerator import MidiGenerator, Channel, Note
 import generateSheets
 
-
 frequencies = [65.40639132514966, 69.29565774421802, 73.41619197935191, 77.78174593052023, 82.4068892282175, 87.30705785825099, 92.4986056779086, 97.99885899543733, 103.8261743949863, 110.0, 116.54094037952248, 123.47082531403103, 130.8127826502993, 138.59131548843604, 146.8323839587038, 155.56349186104046, 164.813778456435, 174.61411571650194, 184.9972113558172, 195.99771799087466, 207.65234878997256, 220.0, 233.08188075904496, 246.94165062806206, 261.6255653005986, 277.1826309768721, 293.6647679174076, 311.1269837220809, 329.6275569128699, 349.2282314330039, 369.9944227116344, 391.99543598174927, 415.3046975799451, 440.0, 466.1637615180899, 493.8833012561241, 523.2511306011972, 554.3652619537442, 587.3295358348151, 622.2539674441618, 659.2551138257398, 698.4564628660078, 739.9888454232688, 783.9908719634985, 830.6093951598903, 880.0, 932.3275230361799, 987.766602512248, 1046.5022612023945, 1108.7305239074883, 1174.65907166963, 1244.5079348883237, 1318.5102276514797, 1396.9129257320155, 1479.9776908465376, 1567.981743926997, 1661.2187903197805, 1760.0, 1864.6550460723593, 1975.533205024496, 2093.004522404789, 2217.4610478149766, 2349.31814333926, 2489.0158697766474, 2637.020455302959, 2793.825851464031, 2959.955381693075, 3135.9634878539937, 3322.437580639561, 3520.0, 3729.3100921447185]
 recording = True
 sleep(2)
@@ -14,14 +13,9 @@ uncombined = []
 aud = FrequencyStream()
 aud.mic.open()
 
-
 start = 0
-jump = 1024/8
+jump = 1024/16
 for fre in aud.read(jump,8192*5):
-	
-
-	
-	
 	goodFre = []
 	good = []
 	
@@ -34,12 +28,12 @@ for fre in aud.read(jump,8192*5):
 			goodFre.append([x,fre[x]])
 		
 	if not goodFre: #nothing above threshold
+		#uncombined.append([-1,start,start+jump])
 		continue
 	
 	#find closest one to each piano note, sum surrounding three,
 	#find max
-	
-	print goodFre, frequencies
+
 	
 	for x in range(0,len(frequencies)): #go through each piano note
 		closest = 1
@@ -55,10 +49,9 @@ for fre in aud.read(jump,8192*5):
 		if closest <= 0.5: #if piano frequency has a close value
 			oldPos = goodFre[pos][1]
 			good.append([sum([fre[oldPos],fre[oldPos-1],fre[oldPos+1]]),x+1])#position of piano frequency + 1, and sum of 3 surrounding fft amplitudes
-
-	print good
 	
 	if not good:
+		#uncombined.append([-1,start,start+jump])
 		continue
 	
 	good = sorted(good)
@@ -70,20 +63,39 @@ for fre in aud.read(jump,8192*5):
 
 aud.mic.close()
 uncombined=sorted(uncombined)
+#print uncombined
 noteSegment = 0
 length = len(uncombined)
 #combine notes
 while noteSegment < len(uncombined)-1:
 	if uncombined[noteSegment][0] == uncombined[noteSegment+1][0]:
-		if uncombined[noteSegment][2] >= uncombined[noteSegment+1][1] - 100:
+		if uncombined[noteSegment][2] >= uncombined[noteSegment+1][1]:
 			uncombined[noteSegment][2] = uncombined[noteSegment+1][2]
 			del uncombined[noteSegment+1]
 		else:
 			noteSegment+=1
 	else:
 		noteSegment+=1
-uncombined = sorted(uncombined, key=lambda x: x[1])			
-combined = [Note(x[0]+35, x[1]/10, x[2]/10) for x in uncombined]
+uncombined = sorted(uncombined, key=lambda x: x[1])
+"""
+filtered =[]
+filtered.append(uncombined[0])
+filtered.append(uncombined[1])
+filtered.append([sorted(uncombined[:5])[3][0],0,64])
+
+for x in range(6,len(uncombined)):
+	filtered.append([sorted(uncombined[x-5:x])[3][0],x*64,x*64+1])
+filtered.append(uncombined[-2])
+filtered.append(uncombined[-1])
+"""
+"""while x < len(filtered) - 1:
+	if filtered[x][0] == filtered[x+1][0]:
+		filtered[x][2] = filtered[x+1][2]
+		filtered.remove[x+1]
+	else:
+		x+=1
+"""
+combined = [Note(x[0]+36,x[1],x[2]) for x in uncombined]#filtered]
 
 newMidi = MidiGenerator(200,1)
 channel = Channel()
@@ -91,6 +103,5 @@ for x in combined:
 	channel.addNote(x)
 channel.endTrack()
 newMidi.addChannel(channel)
-print newMidi.pattern
 newMidi.save("new.midi")
 generateSheets.makePDF("new","new")
