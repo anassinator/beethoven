@@ -3,32 +3,8 @@
 """Microphone audio stream."""
 
 import pyaudio
-import numpy as np
 import pylab as pl
-
-
-class Stream(object):
-
-    """Dual-channel audio stream class."""
-
-    def __init__(self, raw=None):
-        """Construct Stream object from raw audio data."""
-        self.channel_1 = []
-        self.channel_2 = []
-        if raw:
-            self.append(raw)
-
-    @staticmethod
-    def parse(raw):
-        """Parse incoming raw stream."""
-        data = np.fromstring(raw, dtype=np.float32)
-        return data
-
-    def append(self, raw):
-        """Append audio stream into separate channels."""
-        data = Stream.parse(raw)
-        self.channel_1.extend(data[::2])
-        self.channel_2.extend(data[1::2])
+from stream import Stream
 
 
 class Mic(object):
@@ -80,20 +56,16 @@ class Mic(object):
         self.audio.close(self.device)
         self.audio.terminate()
 
-    def read(self, frames=None):
+    def read(self, frames):
         """Read a number of frames of data into the stream."""
-        if frames:
-            raw = self.device.read(frames)
-        else:
-            raw = self.device.read(self.fs)
-
+        raw = self.device.read(frames)
         self.stream = Stream(raw)
 
 
 def main():
     """Plot one second of data in the time domain."""
     with Mic('Blue Snowball') as mic:
-        mic.read()
+        mic.read(mic.fs)
         pl.subplot(2, 1, 1)
         pl.plot(mic.stream.channel_1)
         pl.subplot(2, 1, 2)
