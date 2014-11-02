@@ -6,11 +6,31 @@
             body {
                 text-align: center;
                 margin: auto;
+                background: #F5F1DE;
             }
             h1 {
                 padding-top: 50px;
                 font-family: Garamond;
                 font-size: 3em;
+                }
+            .topcorner {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+            }
+            .topcorner input {
+                text-decoration: none;
+                color: #F5F1DE;
+                padding: 10px 20px;
+                border-radius: 5px;
+                background: rgba(0,0,0,0.75);
+                cursor: pointer;
+                border: none;
+                font-family: Garamond;
+                font-size: 1em;
+            }
+            .topcorner input:hover {
+                background: rgba(0,0,0,0.50);
             }
         </style>
     </head>
@@ -19,8 +39,17 @@
         <img id="notes" src="http://localhost:5000/static/notes.png">
         <script type="text/javascript">
             setInterval(function() {
-                document.getElementById("notes").src = "http://localhost:5000/static/notes.png?time=" + new Date().getTime();
+                document.getElementById("notes").src = "http://localhost:5000/static/notes.png?time="
+                                                     + new Date().getTime();
             }, 1000);
         </script>
+
+        <div class="topcorner">
+            <form action="/pdf" method="post">
+                <input type="submit" value="export">
+            </form>
+        </div>
+
+
     </body>
 </html>
